@@ -24,6 +24,8 @@ Clone this repository:
     git clone https://github.com/openach/docker-openach.git
     cd docker-openach
 ```
+If you want to change any of the Apache settings and/or set up your own SSL certificate, feel free to update the config files under setup.d/etc/apache2/ and setup/etc/ssl/, respectively.
+
 And then build it:
 ```
     sudo docker build -t <yourname>/openach .
