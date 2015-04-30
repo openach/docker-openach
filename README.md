@@ -36,15 +36,15 @@ This can take a while but should eventually return a command prompt. It's done w
 #### If you used the prebuilt image:
 ```
     docker run -d -p 80:80 -p 443:443 openach/openach
-
+```
 #### If you built your own:
 ```
     docker run -p 80:80 -p 443:443 -d <yourname>/openach
-
+```
 #### Access the OpenACH CLI:
 ```
     docker exec -it <YOUR_CONTAINER_ID_OR_NAME> /bin/bash
-
+```
 Note that you will want to use the CLI to set up a user account before you go much further.  See the [OpenACH CLI Documentation](http://openach.com/books/openach-cli-documentation/openach-cli-documentation) for more information.
 
 #### Access the web interface:
