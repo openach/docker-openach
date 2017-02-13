@@ -30,7 +30,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 # Initialize application
 WORKDIR /home/www/
 ADD setup.d/yii-1.1.16.bca042.tar.gz /home/www/
-ADD setup.d/openach-1.4.tar.gz /home/www/openach/
+ADD setup.d/openach-1.5.tar.gz /home/www/openach/
 RUN ln -s yii-1.1.16.bca042/ yii
 
 # Create some symlinks to simplify things when running the docker
