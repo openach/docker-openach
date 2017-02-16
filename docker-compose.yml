@@ -7,7 +7,11 @@ services:
       - ./runtime:/home/www/openach/protected/runtime
       - ./config:/home/www/openach/protected/config
       - ./ssl:/etc/ssl
+    ports:
+      - "80:80"
+      - "443:443"
     expose:
       - "80"
       - "443"
+
 
