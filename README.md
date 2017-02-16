@@ -62,6 +62,7 @@ This can take a while but should eventually return a command prompt. It's done w
 ```
     docker-compose up -d
 ```
+
 #### Access the OpenACH CLI:
 ```
     docker exec -it dockeropenach_web_1 /bin/bash
@@ -72,3 +73,16 @@ Note that you will want to use the CLI to set up a user account before you go mu
 Open your web browser and point to http://localhost/ or https://localhost/
 
 The API would then be located at: http://localhost/api/ or https://localhost/api/
+
+### Production Notes
+When you first run "docker-compose up -d", a new encryption key will be generated for your data, and saved as config/security.php.  An empty SQ
+Lite database will be created as runtime/db/openach.db, and a database config file saved as config/db.php.  Subsequently, whenever you run dock
+er-compose from the openach-docker folder, your OpenACH install will use these configs and database.  If you are using the Docker image as a pr
+oduction environment, you will want to regularly back up config/ and runtime/db/, as your production data depends on these two folders - one fo
+r the encryption keys and the other for the database itself.
+
+#### Migrating Data
+To migrate your config and data to a new host, simply pull a fresh copy of the openach/docker-openach project from GitHub, build the image (if it hasn't been previously built on your server), and copy the config/ and runtime/ folders from your other installation.
+
+#### Security
+Your Docker container exposes both port 80 (http) and port 443 (https).  Be sure to set up appropriate firewall rules on your host machine to protect traffic to these ports.  Also, be aware that the config/security.php file contains your encryption key for your data - protect it and your machine accordingly.
