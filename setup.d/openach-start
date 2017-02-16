@@ -1,6 +1,9 @@
 # Run the openach setup
 php -f /openach-init.php
 
+# Fix permissions on the runtime directory
+chown -R www-data:www-data /home/www/openach/protected/runtime
+
 # remove any stray PID file
 if [ -e "/var/run/apache2/apache2.pid" ]
 then

@@ -58,14 +58,13 @@ And then build it:
 
 This can take a while but should eventually return a command prompt. It's done when it says "Successfully built {hash}"
 
-
 ### Usage
 ```
     docker-compose up -d
 ```
 #### Access the OpenACH CLI:
 ```
-    docker exec -it <YOUR_CONTAINER_ID_OR_NAME> /bin/bash
+    docker exec -it dockeropenach_web_1 /bin/bash
 ```
 Note that you will want to use the CLI to set up a user account before you go much further.  See the [OpenACH CLI Documentation](http://openach.com/books/openach-cli-documentation/openach-cli-documentation) for more information.
 
