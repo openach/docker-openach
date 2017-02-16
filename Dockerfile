@@ -38,21 +38,26 @@ RUN ln -s /home/www/openach/protected/config /config && \
     ln -s /home/www/openach/protected/runtime /runtime && \
     ln -s /home/www/openach/protected/openach /openach
 
-ADD setup.d/openach-setup.php /root/openach-setup.php
-RUN php -f /root/openach-setup.php
+RUN chmod 777 /home/www/openach/protected/runtime/log
+
+RUN chown -R www-data:www-data /home/www/openach/protected/runtime/
+RUN chown -R www-data:www-data /home/www/openach/assets/
+
+ADD setup.d/openach-init.php /openach-init.php
 
 # Configure Apache
 ADD setup.d/etc/apache2/sites-available/* /etc/apache2/sites-available/
-ADD setup.d/etc/ssl/* /etc/ssl/
 RUN a2enmod alias dir mime php5 rewrite status && \
-    a2ensite 000-default default-ssl
-
-# Set up the volumes
-VOLUME ["/home/www/openach/protected/runtime","/home/www/openach/protected/config"]
+    a2ensite 000-default
+RUN a2enmod ssl && \
+    a2ensite default-ssl
 
 # Expose HTTP and HTTPS
 EXPOSE 80 443
 
-# By default, simply start apache.
-CMD /usr/sbin/apache2ctl -D FOREGROUND
+# Add a start management script
+ADD setup.d/openach-start /openach-start
+
+# By default, run our start scripts
+CMD ["bash", "/openach-start"]
 
