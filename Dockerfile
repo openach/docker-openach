@@ -43,6 +43,10 @@ RUN chmod 777 /home/www/openach/protected/runtime/log
 RUN chown -R www-data:www-data /home/www/openach/protected/runtime/
 RUN chown -R www-data:www-data /home/www/openach/assets/
 
+RUN mkdir /etc/ssl/openach/
+ADD ssl/openach/openach-self-signed.key.dist /etc/ssl/openach/openach-self-signed.key
+ADD ssl/openach/openach-self-signed.crt.dist /etc/ssl/openach/openach-self-signed.crt
+
 ADD setup.d/openach-init.php /openach-init.php
 
 # Configure Apache
