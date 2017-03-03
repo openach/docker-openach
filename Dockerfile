@@ -43,8 +43,6 @@ RUN ln -s /home/www/openach/protected/config /config && \
 # Make the temp folder for building ACH files
 RUN mkdir /tmp/achfiles
 
-RUN chmod 777 /home/www/openach/protected/runtime/log
-
 RUN chown -R www-data:www-data /home/www/openach/protected/runtime/
 RUN chown -R www-data:www-data /home/www/openach/assets/
 
