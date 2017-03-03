@@ -10,6 +10,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get install -y \
         git \
         subversion \
+        jq \
         sqlite3 \
         apache2 \
         php5 \
@@ -18,6 +19,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
         php5-sqlite \
         php5-pgsql \
         php5-curl \
+        php5-gmp \
         build-essential \
         php5-dev \
         php-pear && \
@@ -30,13 +32,16 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 # Initialize application
 WORKDIR /home/www/
 ADD setup.d/yii-1.1.16.bca042.tar.gz /home/www/
-ADD setup.d/openach-1.5.tar.gz /home/www/openach/
+ADD setup.d/openach-1.6.tar.gz /home/www/openach/
 RUN ln -s yii-1.1.16.bca042/ yii
 
 # Create some symlinks to simplify things when running the docker
 RUN ln -s /home/www/openach/protected/config /config && \
     ln -s /home/www/openach/protected/runtime /runtime && \
     ln -s /home/www/openach/protected/openach /openach
+
+# Make the temp folder for building ACH files
+RUN mkdir /tmp/achfiles
 
 RUN chmod 777 /home/www/openach/protected/runtime/log
 
