@@ -1,6 +1,10 @@
 # Run the openach setup
 php -f /openach-init.php
 
+if [ ! -d /home/www/openach/protected/log ]; then
+  mkdir -p /home/www/openach/protected/log;
+fi
+
 # Fix permissions on the runtime directory
 chown -R www-data:www-data /home/www/openach/protected/runtime
 
