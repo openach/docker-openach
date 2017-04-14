@@ -1,6 +1,12 @@
 FROM ubuntu:14.04
 MAINTAINER Steven Brendtro <info@openach.com>
 
+# OpenACH Release (release tag from https://github.com/openach/openach/)
+ARG OPENACH_RELEASE=1.7
+
+# Copy our ARG into an ENV var so it persists
+ENV OPENACH_RELEASE ${OPENACH_RELEASE}
+
 # Turn off apt's cache in the container
 RUN echo "Acquire::http {No-Cache=True;};" > /etc/apt/apt.conf.d/no-cache
 
@@ -31,8 +37,18 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 
 # Initialize application
 WORKDIR /home/www/
+
+# Install OpenACH
+RUN mkdir /home/www/openach/
+RUN git clone https://github.com/openach/openach.git /home/www/openach/ && \
+    cd /home/www/openach/ && \
+    git checkout $OPENACH_RELEASE
+
+# Clear out the distributed db and security files, as the startup script will deploy correct versions
+RUN rm -f /home/www/openach/protected/config/db.php /home/www/openach/protected/config/security.php
+
+# Install Yii 1.1
 ADD setup.d/yii-1.1.16.bca042.tar.gz /home/www/
-ADD setup.d/openach-1.7.tar.gz /home/www/openach/
 RUN ln -s yii-1.1.16.bca042/ yii
 
 # Create some symlinks to simplify things when running the docker

@@ -2,7 +2,7 @@ version: "2"
 
 services:
   web:
-    image: openach/openach
+    image: openach/docker-openach
     volumes:
       - ./runtime:/home/www/openach/protected/runtime
       - ./config:/home/www/openach/protected/config
