@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 MAINTAINER Steven Brendtro <info@openach.com>
 
 # OpenACH Release (release tag from https://github.com/openach/openach/)
-ARG OPENACH_RELEASE=1.7
+ARG OPENACH_RELEASE=1.8
 
 # Copy our ARG into an ENV var so it persists
 ENV OPENACH_RELEASE ${OPENACH_RELEASE}

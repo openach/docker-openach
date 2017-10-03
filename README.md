@@ -65,6 +65,8 @@ The latest OpenACH code base is automatically built into a Docker image on https
 
 The docker-compose.yml file looks for the openach/openach image, so you can either build with that label, or build with your own and modify docker-compose.yml accordingly.
 
+Most people can skip this step and proceed directly to **Usage**
+
 ```
     sudo docker build -t openach/openach .
 ```
@@ -90,6 +92,11 @@ Note that the web interface is primarily for trouble-shooting and basic admin fu
 To access the web interface, open your web browser and point to http://localhost/ or https://localhost/
 
 Most importantly, the API is accessible via the web.  Assuming you are using the default _localhost_ hostname, the API would then be located at: http://localhost/api/ or https://localhost/api/
+
+#### Using the REST API:
+The simplest way to get started with the API is by checking out our API docs on Postman: https://documenter.getpostman.com/view/2849701/openach-api/7157b8e
+
+And you can try out the API using our Postman collection:  https://www.getpostman.com/collections/ff17ba32b6d0ebd1b378
 
 ### Production Notes
 When you first run "docker-compose up -d", a new encryption key will be generated for your data, and saved as config/security.php.  An empty SQLite database will be created as runtime/db/openach.db, and a database config file saved as config/db.php.  Subsequently, whenever you run docker-compose from the openach-docker folder, your OpenACH install will use these configs and database.  If you are using the Docker image as a production environment, you will want to regularly back up config/ and runtime/db/, as your production data depends on these two folders - one for the encryption keys and the other for the database itself.
