@@ -43,6 +43,7 @@ WORKDIR /home/www/
 RUN mkdir /home/www/openach/
 RUN git clone https://github.com/openach/openach.git /home/www/openach/ && \
     cd /home/www/openach/ && \
+    git pull origin master && \
     git checkout $OPENACH_RELEASE
 
 # Clear out the distributed db and security files, as the startup script will deploy correct versions
