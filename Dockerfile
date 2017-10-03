@@ -2,6 +2,7 @@ FROM ubuntu:14.04
 MAINTAINER Steven Brendtro <info@openach.com>
 
 # OpenACH Release (release tag from https://github.com/openach/openach/)
+# Update this to the version of OpenACH that should be installed
 ARG OPENACH_RELEASE=1.8
 
 # Copy our ARG into an ENV var so it persists
