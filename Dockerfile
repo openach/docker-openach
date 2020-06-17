@@ -1,12 +1,15 @@
-FROM ubuntu:14.04
+FROM ubuntu:18.04
 MAINTAINER Steven Brendtro <info@openach.com>
 
 # OpenACH Release (release tag from https://github.com/openach/openach/)
 # Update this to the version of OpenACH that should be installed
-ARG OPENACH_RELEASE=1.9.1
+ARG OPENACH_RELEASE=1.9.2
 
 # Copy our ARG into an ENV var so it persists
 ENV OPENACH_RELEASE ${OPENACH_RELEASE}
+
+# Ensure noninteractive mode
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Turn off apt's cache in the container
 RUN echo "Acquire::http {No-Cache=True;};" > /etc/apt/apt.conf.d/no-cache
@@ -20,21 +23,24 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
         jq \
         sqlite3 \
         apache2 \
-        php5 \
-        php5-cli \
-        php5-mcrypt \
-        php5-sqlite \
-        php5-pgsql \
-        php5-curl \
-        php5-gmp \
+        php \
+        php-cli \
+        php-sqlite3 \
+        php-pgsql \
+        php-curl \
+        php-gmp \
         build-essential \
-        php5-dev \
-        php-pear && \
+        php-dev \
+        php-pear \
+        php-bcmath \
+        libapache2-mod-php \
+        libmcrypt-dev && \
     apt-get clean && \
-    pecl install doublemetaphone && \
-    echo 'extension=doublemetaphone.so' > /etc/php5/mods-available/doublemetaphone.ini && \
-    php5enmod doublemetaphone mcrypt sqlite pgsql curl && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN pecl install channel://pecl.php.net/mcrypt-1.0.1 && \
+    echo "extension=mcrypt.so" > /etc/php/7.2/mods-available/mcrypt.ini && \
+    phpenmod mcrypt
 
 # Initialize application
 WORKDIR /home/www/
@@ -50,8 +56,8 @@ RUN git clone https://github.com/openach/openach.git /home/www/openach/ && \
 RUN rm -f /home/www/openach/protected/config/db.php /home/www/openach/protected/config/security.php
 
 # Install Yii 1.1
-ADD setup.d/yii-1.1.16.bca042.tar.gz /home/www/
-RUN ln -s yii-1.1.16.bca042/ yii
+ADD setup.d/yii-1.1.22.bf1d26.tar.gz /home/www/
+RUN ln -s yii-1.1.22.bf1d26/ yii
 
 # Create some symlinks to simplify things when running the docker
 RUN ln -s /home/www/openach/protected/config /config && \
@@ -72,7 +78,7 @@ ADD setup.d/openach-init.php /openach-init.php
 
 # Configure Apache
 ADD setup.d/etc/apache2/sites-available/* /etc/apache2/sites-available/
-RUN a2enmod alias dir mime php5 rewrite status && \
+RUN a2enmod alias dir mime php7.2 rewrite status && \
     a2ensite 000-default
 RUN a2enmod ssl && \
     a2ensite default-ssl
