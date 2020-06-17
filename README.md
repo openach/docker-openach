@@ -1,11 +1,11 @@
 # docker-openach
-Docker with OpenACH, running Apache, mod_php, and SQLite
+Docker with OpenACH, running on an Ubuntu 18.04 LTS image with Apache, PHP 7.3, and and SQLite
 
 This repository contains **Dockerfile** of [OpenACH](http://openach.com/) for [Docker](https://www.docker.com/)'s [automated build](https://registry.hub.docker.com/u/openach/openach/) published to the public [Docker Hub Registry](https://registry.hub.docker.com/).
 
 ### Base Docker Image
 
-* [dockerfile/ubuntu](http://dockerfile.github.io/#/ubuntu)
+* [dockerfile/ubuntu](http://dockerfile.github.io/#/ubuntu) 18.04 LTS
 
 
 ### Installation
