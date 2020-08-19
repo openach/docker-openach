@@ -86,8 +86,14 @@ The first time the image is run, the startup script will initialize both config/
 ```
 Note that you will want to use the CLI to set up a user account before you go much further.  See the [OpenACH CLI Documentation](https://openach.com/books/openach-cli-documentation/openach-cli-documentation) for more information.
 
+Note that with version 1.9.3, a shortcut to CLI was added to docker-compose.yml.
+```
+   docker-compose run --rm cli
+   docker-compose run --rm cli user create --user_login=johndoe --user_password=supersecret --user_email_address=johndoe@email.com --user_first_name=John --user_last_name=Doe
+```
+
 #### Access the web interface:
-Note that the web interface is primarily for trouble-shooting and basic admin functions.  It is provided for convenience, but will be deprecated in future releases.   As such, most administrative tasks should be done via the OpenACH CLI.
+Note that the web interface is primarily for trouble-shooting and basic admin functions.  It is provided for convenience, **and will be deprecated in future releases.** As such, most administrative tasks should be done via the OpenACH CLI.
 
 To access the web interface, open your web browser and point to http://localhost/ or https://localhost/
 
