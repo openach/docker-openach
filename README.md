@@ -84,7 +84,7 @@ The first time the image is run, the startup script will initialize both config/
 ```
     docker exec -it dockeropenach_web_1 /bin/bash
 ```
-Note that you will want to use the CLI to set up a user account before you go much further.  See the [OpenACH CLI Documentation](http://openach.com/books/openach-cli-documentation/openach-cli-documentation) for more information.
+Note that you will want to use the CLI to set up a user account before you go much further.  See the [OpenACH CLI Documentation](https://openach.com/books/openach-cli-documentation/openach-cli-documentation) for more information.
 
 #### Access the web interface:
 Note that the web interface is primarily for trouble-shooting and basic admin functions.  It is provided for convenience, but will be deprecated in future releases.   As such, most administrative tasks should be done via the OpenACH CLI.
