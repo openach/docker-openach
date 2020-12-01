@@ -7,6 +7,13 @@ This repository contains **Dockerfile** of [OpenACH](http://openach.com/) for [D
 
 * [dockerfile/ubuntu](http://dockerfile.github.io/#/ubuntu) 18.04 LTS
 
+### Security Note
+PHP 7.2 EOL (end-of-life) was November 30, 2020. __However, the base image for this build is an LTS (long-term support) Ubuntu version, supported well into 2022.__ As such, Ubuntu will include critical security patches for PHP 7.2 in their images. Our Dockerfile includes automated package updates. Until OpenACH is certified for newer PHP versions, we recommend routinely pulling the latest OpenACH image build from Docker Hub. Alternatively, you can simply rebuild locally from the Dockerfile to ensure updates are applied.
+
+See https://hub.docker.com/repository/docker/openach/openach/ for the latest build information.
+
+_Latest build: December 1, 2020_
+
 
 ### Installation
 
