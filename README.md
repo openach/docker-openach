@@ -1,14 +1,37 @@
 # docker-openach
-Docker with OpenACH, running on an Ubuntu 18.04 LTS image with Apache, PHP 7.3, and and SQLite
+Docker with OpenACH, running on an Ubuntu 20.04 LTS image with Apache, PHP 7.4, and and SQLite
 
 This repository contains **Dockerfile** of [OpenACH](http://openach.com/) for [Docker](https://www.docker.com/)'s [automated build](https://registry.hub.docker.com/u/openach/openach/) published to the public [Docker Hub Registry](https://registry.hub.docker.com/).
 
 ### Base Docker Image
 
-* [dockerfile/ubuntu](http://dockerfile.github.io/#/ubuntu) 18.04 LTS
+* [dockerfile/ubuntu](http://dockerfile.github.io/#/ubuntu) 20.04 LTS
+
+### IMPORTANT UPDATE
+The most recent changes have upgraded the base image to Ubuntu 20.04 LTS, and PHP 7.4.  Since PHP dropped support for the mcrypt extension in 7.2, we had been installing it from PEAR. To make for a cleaner install, we have moved to using the `phpseclib/mcrypt_compat` package. To accomplish this, there are some significant changes to this project's `Dockerfile`:
+
+1. Removed the PEAR install of mcrypt extension
+2. Removed the outdated version of phpseclib from `protected/vendors/phpseclib`
+3. Removed old Yii 1.x framework install (previously done via tarball)
+4. Added `composer`
+5. Added RUN for `composer install` during build
+
+Also to facilitate these changes, changes were made in the `openach/openach` repo:
+1. Added a composer.json file to facilitate composer-based library installation
+2. Through composer, required `yiisoft/yii`, `phpseclib/phpseclib`, and `phpseclib/mcrypt_compat`, and `cweagans/composer-patches` packages
+3. Added a composer patch in `openach/openach` in the `patches` folder, which changes how CSecurityManager in Yii 1.x looks for the mcrypt extension, making it compatible with `phpseclib/mcrypt_compat`
+4. Modified the CLI script, along with all PHP entrypoint scripts, to use the composer autoloader, removing references to tarball-based Yii install.
+
+The result for users of this docker container is a new, fully up-to-date platform running on PHP 7.4 that is backwards-compatible with config and data files (including encrypted data) from older installs.
+
+NOTE: If you previously made local customization to `Dockerfile`, you will want to merge those changes very carefully, and ensure that you pull the latest version of code from `openach/openach` that has been updated for PHP 7.4.
 
 ### Security Note
-PHP 7.2 EOL (end-of-life) was November 30, 2020. __However, the base image for this build is an LTS (long-term support) Ubuntu version, supported well into 2022.__ As such, Ubuntu will include critical security patches for PHP 7.2 in their images. Our Dockerfile includes automated package updates. Until OpenACH is certified for newer PHP versions, we recommend routinely pulling the latest OpenACH image build from Docker Hub. Alternatively, you can simply rebuild locally from the Dockerfile to ensure updates are applied.
+PHP 7.2 EOL (end-of-life) was November 30, 2020. __OpenACH is now certified for PHP 7.4. We strongly recommend upgrading to the latest version of this repository.__ 
+
+If you are using a self-built image, please merge any new changes from our distributed Dockerfile into yours and rebuild. 
+
+If you are using our pre-built images, *first back up your data*, then run `docker-compose pull`, and then `docker-compose up -d`.
 
 See https://hub.docker.com/repository/docker/openach/openach/ for the latest build information.
 
@@ -88,15 +111,23 @@ This can take a while but should eventually return a command prompt. It's done w
 The first time the image is run, the startup script will initialize both config/db.php and config/security.php, and install a default database in runtime/db/openach.db, assuming they don't already exist.
 
 #### Access the OpenACH CLI:
+You can get a shell inside the container as follows:
 ```
     docker exec -it dockeropenach_web_1 /bin/bash
 ```
-Note that you will want to use the CLI to set up a user account before you go much further.  See the [OpenACH CLI Documentation](https://openach.com/books/openach-cli-documentation/openach-cli-documentation) for more information.
+Note that with version 1.9.3, a shortcut to CLI was added to docker-compose.yml:
+```
+   docker-compose run --rm cli <command> <options>
+```
 
-Note that with version 1.9.3, a shortcut to CLI was added to docker-compose.yml.
+Note that you will want to use the CLI to set up a user account before you go much further.  The following steps should get you most of the way there. For more information, see the [OpenACH CLI Documentation](https://openach.com/books/openach-cli-documentation/openach-cli-documentation).
+
+##### See available commands and set up a user:
 ```
    docker-compose run --rm cli
    docker-compose run --rm cli user create --user_login=johndoe --user_password=supersecret --user_email_address=johndoe@email.com --user_first_name=John --user_last_name=Doe
+   docker-compose run --rm cli user setup --user_id=<user-id-from-previous-step> --name="Test Originator" --identification=112358130 --routing_number=101000187 --account_number=1234567890
+   # Note the IDs generated by these commands as you will need them later.
 ```
 
 #### Access the web interface:
@@ -107,15 +138,21 @@ To access the web interface, open your web browser and point to http://localhost
 Most importantly, the API is accessible via the web.  Assuming you are using the default _localhost_ hostname, the API would then be located at: http://localhost/api/ or https://localhost/api/
 
 #### Using the REST API:
+To use the REST API, you will need to create an API key/secret:
+```
+   docker-compose run --rm cli apiuser create --user_id=<user-id-from-previous-step> --originator_info_id=<originator-info-id-from-previous-step>
+   # Note the api token and key generated by this command, as you will use them to connect to the API
+```
+
 The simplest way to get started with the API is by checking out our API docs on Postman: https://documenter.getpostman.com/view/2849701/openach-api/7157b8e
 
 And you can try out the API using our Postman collection:  https://www.getpostman.com/collections/ff17ba32b6d0ebd1b378
 
 ### Production Notes
-When you first run "docker-compose up -d", a new encryption key will be generated for your data, and saved as config/security.php.  An empty SQLite database will be created as runtime/db/openach.db, and a database config file saved as config/db.php.  Subsequently, whenever you run docker-compose from the openach-docker folder, your OpenACH install will use these configs and database.  If you are using the Docker image as a production environment, you will want to regularly back up config/ and runtime/db/, as your production data depends on these two folders - one for the encryption keys and the other for the database itself.
+When you first run `docker-compose up -d`, a new encryption key will be generated for your data, and saved as `config/security.php`.  An empty SQLite database will be created as `runtime/db/openach.db`, and a database config file saved as `config/db.php`.  Subsequently, whenever you run docker-compose from the openach-docker folder, your OpenACH install will use these configs and database.  If you are using the Docker image as a production environment, you will want to regularly back up `config/` and `runtime/db/`, as your production data depends on these two folders - one for the encryption keys and the other for the database itself.
 
 #### Migrating Data
-To migrate your config and data to a new host, simply pull a fresh copy of the openach/docker-openach project from GitHub, build the image (if it hasn't been previously built on your server), and copy the config/ and runtime/ folders from your other installation.
+To migrate your config and data to a new host, simply pull a fresh copy of the openach/docker-openach project from GitHub, build the image (if it hasn't been previously built on your server), and copy the `config/` and `runtime/` folders from your other installation.
 
 #### Security
-Your Docker container exposes both port 80 (http) and port 443 (https).  Be sure to set up appropriate firewall rules on your host machine to protect traffic to these ports.  Also, be aware that the config/security.php file contains your encryption key for your data - protect it and your machine accordingly.
+Your Docker container exposes both port 80 (http) and port 443 (https).  Be sure to set up appropriate firewall rules on your host machine to protect traffic to these ports.  Also, be aware that the `config/security.php` file contains your encryption key for your data - protect it and your machine accordingly.

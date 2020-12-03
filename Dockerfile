@@ -1,9 +1,9 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 MAINTAINER Steven Brendtro <info@openach.com>
 
 # OpenACH Release (release tag from https://github.com/openach/openach/)
 # Update this to the version of OpenACH that should be installed
-ARG OPENACH_RELEASE=1.9.3
+ARG OPENACH_RELEASE=1.9.4
 
 # Copy our ARG into an ENV var so it persists
 ENV OPENACH_RELEASE ${OPENACH_RELEASE}
@@ -19,6 +19,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y \
         git \
+        unzip \
         subversion \
         jq \
         sqlite3 \
@@ -30,17 +31,36 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
         php-curl \
         php-gmp \
         build-essential \
-        php-dev \
         php-pear \
         php-bcmath \
+        php-zip \
         libapache2-mod-php \
-        libmcrypt-dev && \
+        curl \
+        vim && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN pecl install channel://pecl.php.net/mcrypt-1.0.1 && \
-    echo "extension=mcrypt.so" > /etc/php/7.2/mods-available/mcrypt.ini && \
-    phpenmod mcrypt
+# Attempt to fix a pear warning
+RUN mkdir -p /tmp/pear/cache
+
+# Environment settings for composer
+ENV COMPOSER_ALLOW_SUPERUSER=1 \
+    PATH=/root/.composer/vendor/bin:$PATH \
+    TERM=linux \
+    VERSION_PRESTISSIMO_PLUGIN=^0.3.10
+
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- \
+        --version=1.10.16 \
+        --filename=composer \
+        --install-dir=/usr/local/bin \
+    composer clear-cache
+
+# Install composer plugins
+RUN composer global require --optimize-autoloader \
+        "hirak/prestissimo:${VERSION_PRESTISSIMO_PLUGIN}" && \
+    composer global dumpautoload --optimize && \
+    composer clear-cache
 
 # Initialize application
 WORKDIR /home/www/
@@ -55,9 +75,12 @@ RUN git clone https://github.com/openach/openach.git /home/www/openach/ && \
 # Clear out the distributed db and security files, as the startup script will deploy correct versions
 RUN rm -f /home/www/openach/protected/config/db.php /home/www/openach/protected/config/security.php
 
-# Install Yii 1.1
-ADD setup.d/yii-1.1.22.bf1d26.tar.gz /home/www/
-RUN ln -s yii-1.1.22.bf1d26/ yii
+WORKDIR /home/www/openach/
+RUN if [ -f composer.json ]; then  \
+    composer install && composer clear-cache; \
+fi
+
+WORKDIR /home/www/
 
 # Create some symlinks to simplify things when running the docker
 RUN ln -s /home/www/openach/protected/config /config && \
@@ -78,7 +101,7 @@ ADD setup.d/openach-init.php /openach-init.php
 
 # Configure Apache
 ADD setup.d/etc/apache2/sites-available/* /etc/apache2/sites-available/
-RUN a2enmod alias dir mime php7.2 rewrite status && \
+RUN a2enmod alias dir mime php7.4 rewrite status && \
     a2ensite 000-default
 RUN a2enmod ssl && \
     a2ensite default-ssl
